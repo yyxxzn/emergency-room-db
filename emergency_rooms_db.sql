@@ -57,20 +57,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION stop_update() RETURNS TRIGGER AS $$
-BEGIN
-    -- This trigger is redundant because room_id is a primary key and we can have only 1 room with this ID
-    IF EXISTS (SELECT Count(*) FROM ExaminationsRooms GROUP BY room_id HAVING Count(*) > 1) THEN
-        RAISE NOTICE 'This doctor already has a room assigned.';
-        ROLLBACK;
-    END IF;
-    RETURN NEW;
-    END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER check_room_assignment
-AFTER INSERT ON ExaminationsRooms
-EXECUTE FUNCTION stop_update();
 
 CREATE TRIGGER after_insert_Reservations
 AFTER INSERT ON Reservations
